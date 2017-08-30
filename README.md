@@ -8,8 +8,6 @@ The main purpose of this container is to quickly get a Ceph cluster up and runni
 
 ## Usage
 
-The environment variables `MON_NAME` and `MON_IP` are required:
-
 - `MON_NAME` is the name of the monitor (DEFAULT: hostname)
 - `MON_IP` is the IP address of the monitor (public)
 - `RGW_NAME` is the name of rados gateway instance (DEFAULT: hostname)
@@ -18,14 +16,26 @@ The environment variables `MON_NAME` and `MON_IP` are required:
 - `CEPH_PUBLIC_NETWORK` is the network where the OSD should communicate
 - `CEPH_DEMO_UID`, `CEPH_DEMO_ACCESS_KEY`, `CEPH_DEMO_SECRET_KEY`, and `CEPH_DEMO_BUCKET` can be used to auto-provision an account.
 
-Commonly, you will want to bind-mount your host's `/etc/ceph` into the container. For example:
+Commonly, you will want to bind-mount your host's `/etc/ceph` into the container. You'll also want to retain the IP during reboots and upgrades since it's written to the ceph.conf file.
 
-`docker run -d --net=host -v /etc/ceph:/etc/ceph -e MON_IP=192.168.0.20 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 docker.avvo.com/ceph-demo:luminous`
-
-## Tip
-
-If you get user_xattr error, try to remount your docker partition:
-
+### Docker Compose
+```YAML
+version: '2'
+services:
+  ceph:
+    image: docker.avvo.com/ceph-demo:luminous
+    volumes:
+    - /etc/ceph:/etc/ceph
+    labels:
+      io.rancher.scheduler.affinity:host_label: facing=db
+      io.rancher.container.pull_image: always
 ```
-sudo mount -o remount,user_xattr,rw $(df -P /var/lib/docker |tail -1 |tr -s ' ' |cut -d' ' -f6)
+
+### Rancher Compose
+```YAML
+version: '2'
+services:
+  ceph:
+    retain_ip: true
 ```
+
