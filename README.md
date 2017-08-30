@@ -20,7 +20,7 @@ The environment variables `MON_NAME` and `MON_IP` are required:
 
 Commonly, you will want to bind-mount your host's `/etc/ceph` into the container. For example:
 
-`docker run -d --net=host -v /etc/ceph:/etc/ceph -e MON_IP=192.168.0.20 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 ceph/demo`
+`docker run -d --net=host -v /etc/ceph:/etc/ceph -e MON_IP=192.168.0.20 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 docker.avvo.com/ceph-demo:luminous`
 
 ## Tip
 
