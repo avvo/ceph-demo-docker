@@ -2,6 +2,34 @@
 set -e
 export LC_ALL=C
 
+
+RANCHER_METADATA='http://rancher-metadata.rancher.internal/latest'
+RANCHER_SERVICE=$(curl -s ${RANCHER_METADATA}/self/container/service_name)
+RANCHER_STACK=$(curl -s ${RANCHER_METADATA}/self/container/stack_name)
+
+if [[ -z "$MON_NAME" ]]; then
+  MON_NAME=$RANCHER_SERVICE.$RANCHER_STACK
+fi
+
+if [[ -z "$RGW_NAME" ]]; then
+  RGW_NAME=$RANCHER_SERVICE.$RANCHER_STACK
+fi
+
+if [[ -z "$MGR_NAME" ]]; then
+  MGR_NAME=$RANCHER_SERVICE.$RANCHER_STACK
+fi
+
+if [[ -z "$MON_IP" ]]; then
+  MON_IP=$(curl -s ${RANCHER_METADATA}/self/container/primary_ip)
+fi
+
+# Assume network is a /16
+if [[ -z "$CEPH_PUBLIC_NETWORK" ]]; then
+  SUBNET=$(netstat -nr | grep eth0 | netstat -nr | grep eth0 | grep 255.255.0.0 | awk {'print $1'})
+  CEPH_PUBLIC_NETWORK=$SUBNET/16
+fi
+
+
 # Global variables
 : ${CLUSTER:=ceph}
 : ${RGW_NAME:=$(hostname -s)}
@@ -256,6 +284,9 @@ ENDHERE
   # start MON
   chown --verbose -R ceph. $CEPH_PATH_BASE/mon /etc/ceph/
   ceph-mon ${DAEMON_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789"
+
+  # create rbd pool
+  ceph ${CLI_OPTS} osd pool create rbd 8
 
   # change replica size
   ceph ${CLI_OPTS} osd pool set rbd size 1

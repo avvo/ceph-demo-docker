@@ -7,7 +7,7 @@ MAINTAINER Abi X Renhart "arenhart@avvo.com"
 ENV CEPH_VERSION luminous
 
 # Install Ceph and prerequisites
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev sharutils python3 s3cmd && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev sharutils python3 s3cmd curl net-tools && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FE869A9 && \
     echo "deb http://ppa.launchpad.net/gluster/libntirpc/ubuntu xenial main" | tee /etc/apt/sources.list.d/libntirpc.list && \
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
